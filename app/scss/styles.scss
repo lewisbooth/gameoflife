@@ -1,0 +1,50 @@
+@import 'fonts';
+
+$background-color: #222;
+$foreground-color: #eee;
+$active-color: red;
+$highlight-color: darkred;
+
+* {
+    background-color: $background-color;
+    color: $foreground-color;
+    font-family: "San Francisco";   
+    font-weight: 500;
+    text-align: center;
+}
+
+body {
+    padding: 50px;
+}
+
+.game-container {
+    padding: 50px 0;
+    width: 100%;
+    display: block;
+    clear: both;
+}
+
+button {
+    font-size: 16px;
+    font-weight: 200;
+    border: 1px solid $foreground-color;
+    padding: 5px 10px;
+}
+
+button:hover {
+    background-color: $highlight-color;
+    cursor: hand;
+}
+
+button:active {
+    background-color: $active-color;  
+    outline: 0;
+    -webkit-box-shadow: none;
+            box-shadow: none;
+}
+
+button:focus {
+    outline: 0;
+    -webkit-box-shadow: none;
+            box-shadow: none;
+}
