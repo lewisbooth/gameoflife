@@ -14,6 +14,7 @@ gulp.task('default', ['sass'], function () {
     });
 
     gulp.watch("app/scss/*.scss", ['sass']);
+    gulp.watch("./app/js/*.js").on("change", reload);
     gulp.watch("./app/*.html").on("change", reload);
 });
 

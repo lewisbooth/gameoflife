@@ -17,11 +17,8 @@ body {
     padding: 50px;
 }
 
-.game-container {
-    padding: 50px 0;
-    width: 100%;
-    display: block;
-    clear: both;
+h1 {
+    margin: 0;
 }
 
 button {
@@ -47,4 +44,11 @@ button:focus {
     outline: 0;
     -webkit-box-shadow: none;
             box-shadow: none;
+}
+
+.game-container {
+    padding: 50px 0;
+    width: 100%;
+    display: block;
+    clear: both;
 }
