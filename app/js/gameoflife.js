@@ -1,7 +1,8 @@
- const  config = {
+
+const  config = {
             blockSize: 10,    
-            cellActiveColor: "#555",      
-            cellInactiveColor: "#222"       
+            cellActiveColor: "#333",      
+            cellInactiveColor: "#1a1a1a"       
         },
 
         game = document.getElementById('game'),
@@ -17,59 +18,57 @@
         gliderButton = document.querySelector('#glider'),
         resetButton = document.querySelector('#reset');
 
-let     gridCurrent = new Array(totalBlocks),
-        gridNext = new Array(totalBlocks),
+let     gridCurrent = new Array(),
+        gridNext = new Array(),
         paused = false;
 
 // Creates nested array for each cell including state indicator [x, y, state]
-function initializeArray() {        
-    let x = 0, y = 0;
-    for (i = 0; i < totalBlocks; i++) {
-        if (x == blocksX) {
-            x = 0;
-            y++;
-        }        
-        gridCurrent[i] = [x * config.blockSize, y * config.blockSize, 0];
-        x++
+function initializeArray() {     
+    for (x = 0; x < blocksX; x++) {
+        gridNext[x] = new Array();
+        gridCurrent[x] = new Array();
+        for (y = 0; y < blocksY; y++) {
+            gridNext[x][y] = new Array();
+            gridCurrent[x][y] = new Array();
+        }
     };
-    gridNext = [...gridCurrent];
+    for (x = 0; x < blocksX; x++) {
+        for (y = 0; y < blocksY; y++) {
+            gridNext[x][y] = 0;
+            gridCurrent[x][y] = 0;
+        }
+    };
     drawGrid();
 }
 
 function randomizeArray() {
-    // Fills grid with noise
-    gridCurrent.forEach(data => { 
-        random = Math.round(Math.random() * 10);
-        if (random > 8) {
-            data[2] = 1
-        } else { 
-            data[2] = 0 
+    for (x = 0; x < blocksX; x++) {
+        for (y = 0; y < blocksY; y++) {
+            gridCurrent[x][y] = Math.round(Math.random());
         }
-    });
-    gridNext = [...gridCurrent];
-    drawGrid();
-    paused = true;
-}
-
-function gliderLayout() {
-    gridCurrent.forEach(data => {
-        data[2] = 1;
-    })
+    };
     drawGrid();
 }
 
-function drawGrid(once = true) {   
-    gridCurrent = [...gridNext];
-    gridCurrent.forEach(data => { 
-        canvas.beginPath();
-        // Create square with 1px padding
-        canvas.rect(data[0] + 1, data[1] + 1, config.blockSize - 2, config.blockSize - 2);
-        // Fill light/dark if alive/dead
-        if (data[2] == 0 ? canvas.fillStyle = config.cellInactiveColor : canvas.fillStyle = config.cellActiveColor);
-        canvas.fill();
-        canvas.closePath();
-    });
-    if (!once) {setTimeout(calculateFrame, 20)}
+function drawGrid(once = true) {  
+    for (x = 0; x < blocksX; x++) {
+        for (y = 0; y < blocksY; y++) {
+            // Check status
+            if (gridCurrent[x][y] == 1 ? alive = true : alive = false);
+            let posX = x * config.blockSize + 1;
+            let posY = y * config.blockSize + 1;
+            canvas.beginPath();
+            // Create square with 1px padding
+            canvas.rect(posX, posY, config.blockSize - 2, config.blockSize - 2);
+            // Fill light/dark if alive/dead
+            if (alive ? canvas.fillStyle = config.cellActiveColor : canvas.fillStyle = config.cellInactiveColor);
+            canvas.fill();
+            canvas.closePath();
+        }
+    };
+
+    // Check if looping or stepping before calculating next frame
+    if (!once) {setTimeout(calculateFrame), 500}
 }
 
 function calculateFrame(once = false) { 
@@ -77,152 +76,121 @@ function calculateFrame(once = false) {
     if (paused) {return};
 
     let alive, 
-        aliveNext,
         neighbourCount,
-        r,
-        br,
-        b,
-        bl,
-        l,
-        tl,
-        t,
-        tr,
-        addEventListener,
         onRight = false, 
         onBottom = false, 
         onLeft = false, 
         onTop = false;
      
-    for (i = 0; i < totalBlocks; i++) {
+    for (x = 0; x < blocksX; x++) {
+        for (y = 0; y < blocksY; y++) {
 
-        r = 0;
-        br = 0;
-        b = 0;
-        bl = 0;
-        l = 0;
-        tl = 0;
-        t = 0;
-        tr = 0;
+            gridNext[x][y] = gridCurrent[x][y];
 
-        neighbourCount = 0; 
+            if (gridCurrent[x][y] == 1 ? alive = true : alive = false);
 
-        if (parseInt(gridCurrent[i][2]) == 0) {
-            alive = false
-        } else {
-            alive = true
-        }
+            if (x == (blocksX - 1) ? onRight = true : onRight = false);
 
-        if (gridCurrent[i][0] == (blocksX - 1) * config.blockSize) {
-            onRight = true
-        } else {
-            onRight = false
-        };
+            if (y == (blocksY - 1) ? onBottom = true : onBottom = false);
+            
+            if (x == 0 ? onLeft = true : onLeft = false);
 
-        if (gridCurrent[i][1] == (blocksY - 1) * config.blockSize) {
-            onBottom = true
-        } else {
-            onBottom = false
-        };
+            if (y == 0 ? onTop = true : onTop = false);
 
-        if (gridCurrent[i][0] == 0) {
-            onLeft = true
-        } else {
-            onLeft = false
-        };
+            neighbourCount = 0; 
 
-        if (gridCurrent[i][1] == 0) {
-            onTop = true
-        } else {
-            onTop = false;
-        };
-
-        // Check right cell
-        if (!onRight) {
-            if (gridCurrent[i + 1][2]) {
-                neighbourCount += gridCurrent[i + 1][2]
-                r += gridCurrent[i + 1][2]
+            // Check right cell
+            if (!onRight) {
+                if (gridCurrent[x + 1][y] == 1) {
+                    neighbourCount++;
+                }
             }
-        }
-        // Check bottom right cell
-        if (!onRight && !onBottom) {
-            if (Number.isInteger(gridCurrent[i + blocksX + 1][2])) {
-                neighbourCount += gridCurrent[i + blocksX + 1][2];
-                br += gridCurrent[i + blocksX + 1][2];
+            // Check bottom right cell
+            if (!onRight && !onBottom) {
+                if (gridCurrent[x + 1][y + 1] == 1) {
+                    neighbourCount++;
+                }
             }
-        }
-        // Check bottom cell
-        if (!onBottom) {
-            if (Number.isInteger(gridCurrent[i + blocksX][2])) {
-                neighbourCount += gridCurrent[i + blocksX][2];
-                b += gridCurrent[i + blocksX][2];
+            // Check bottom cell
+            if (!onBottom) {
+                if (gridCurrent[x][y + 1] == 1) {
+                    neighbourCount++;
+                }
             }
-        }
-        // Check bottom left cell
-        if (!onLeft && !onBottom ) {
-            if (Number.isInteger(gridCurrent[i + blocksX - 1][2])) {
-                neighbourCount += gridCurrent[i + blocksX - 1][2];
-                bl += gridCurrent[i + blocksX - 1][2];
+            // Check bottom left cell
+            if (!onLeft && !onBottom) {
+                if (gridCurrent[x - 1][y + 1] == 1) {
+                    neighbourCount++;
+                }
             }
-        }
-        // Check left cell
-        if (!onLeft) {
-            if(Number.isInteger(gridCurrent[i - 1][2])) {
-                neighbourCount += gridCurrent[i - 1][2];
-                l += gridCurrent[i - 1][2];
+            // Check left cell
+            if (!onLeft) {
+                if (gridCurrent[x - 1][y] == 1) {
+                    neighbourCount++;
+                }
             }
-        }
-        // Check top left cell
-        if (!onLeft && !onTop) {
-            if(Number.isInteger(gridCurrent[i - blocksX - 1][2])) {
-                neighbourCount += gridCurrent[i - blocksX - 1][2];
-                tl += gridCurrent[i - blocksX - 1][2];
+            // Check top left cell
+            if (!onLeft && !onTop) {
+                if (gridCurrent[x - 1][y - 1] == 1) {
+                    neighbourCount++;
+                }
             }
-        }
-        // Check top cell
-        if (!onTop) {
-            if(Number.isInteger(gridCurrent[i - blocksX][2])) {
-                neighbourCount += gridCurrent[i - blocksX][2];
-                t += gridCurrent[i - blocksX][2];
+            // Check top cell
+            if (!onTop) {
+                if (gridCurrent[x][y - 1] == 1) {
+                    neighbourCount++;
+                }
             }
-        }
-        // Check top right cell
-        if (!onTop && !onRight) {
-            if(Number.isInteger(gridCurrent[i - blocksX + 1][2])) {
-                neighbourCount += gridCurrent[i - blocksX + 1][2];
-                tr += gridCurrent[i - blocksX + 1][2];
+            // Check top right cell
+            if (!onTop && !onRight) {
+                if (gridCurrent[x + 1][y - 1] == 1) {
+                    neighbourCount++;
+                }
             }
-        }
 
-        if (alive && neighbourCount < 2) {
-            aliveNext = false;
-        } else if (alive && neighbourCount == 2) {
-            aliveNext = true;
-        } else if (alive && neighbourCount == 3) {
-            aliveNext = true;
-        } else if (alive && neighbourCount > 3) {
-            aliveNext = false;
-        } else if (!alive && neighbourCount == 3) {
-            aliveNext = true;
-        } else { aliveNext = false };
+            if (alive && neighbourCount < 2) {
+                gridNext[x][y] = 0;
+            } 
+             if (alive && (neighbourCount == 2 || neighbourCount == 3)) {
+                gridNext[x][y] = 1;
+            } 
+             if (alive && neighbourCount > 3) {
+                gridNext[x][y] = 0;
+            } 
+             if (!alive && neighbourCount == 3) {
+                gridNext[x][y] = 1;
+            };
 
-        if (aliveNext) {
-            gridNext[i][2] = 1;
-        } else {
-            gridNext[i][2] = 0;
         }
-
-        console.log(i, `Alive: ${alive}  neighbourCount: ${neighbourCount}`, r, br, b, bl, l, tl, t, tr, aliveNext)
-
+    }
+    for (x = 0; x < blocksX; x++) {
+        for (y = 0; y < blocksY; y++) {
+            gridCurrent[x][y] = gridNext[x][y];
+        }
     }
     if (once ? drawGrid() : drawGrid(false));
+}
+
+function updateGrid(e) {
+    var rect = game.getBoundingClientRect();
+    var x = Math.floor(e.offsetX / 10);
+    var y = Math.floor(e.offsetY / 10);
+    console.log(x, y)
+    if (gridCurrent[x][y] == 0) {
+        gridCurrent[x][y] = 1;
+    } else {
+        gridCurrent[x][y] = 0;
+    }
+    console.log(gridCurrent[x][y])
+    drawGrid();
 }
 
 startButton.addEventListener('click', function() {paused = false; calculateFrame(false)});
 stepButton.addEventListener('click', function() {paused = false; calculateFrame(true)});
 randomButton.addEventListener('click', randomizeArray);
-gliderButton.addEventListener('click', gliderLayout);
 resetButton.addEventListener('click', initializeArray);
 pauseButton.addEventListener('click', function() {paused = true});
+game.addEventListener('click', e => {updateGrid(e)});
 
 initializeArray();
 randomizeArray();
